@@ -19,7 +19,7 @@ def sigmoid(x):
     The formula is 1 / (1 + e^(-x))
     but e is equivalent to 2.71828.
     """
-    return 1 / (1 + 2.71828 ** (-x))
+    return 1 / (1 + np.exp(-x)) #Optimized using numpy's np.exp
 
 class MatrixInput(BaseModel):
     """
