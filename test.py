@@ -1,31 +1,68 @@
 from fastapi import FastAPI
-import uvicorn 
-import numpy as np 
+from pydantic import BaseModel
+import uvicorn
+import numpy as np
 
 app = FastAPI()
 
-# use the post decorator directly below this
-'''
-    Initialize M and B as np arrays
-'''
-def f(x):
-    pass
- 
-#Implement the formula MX + B
-#Have two function one using numpy and another not using numpy
-#Return 
+# Sigmoid Function: σ(x) = 1 / (1 + e⁻ˣ)
+# Where:
+# x is the input value.
+# e is Euler's number (approximately 2.71828).
 
-#initialize x as a 5 * 5 matrix
+# Sigmoid function
+def sigmoid(x):
+    """
+    This sigmoid function returns an 
+    output between 0 and 1.
 
-#Make a call to the function
+    The formula is 1 / (1 + e^(-x))
+    but e is equivalent to 2.71828.
+    """
+    return 1 / (1 + 2.71828 ** (-x))
 
-#Recreate the function with the sigmoid Function
+class MatrixInput(BaseModel):
+    """
+    This model validates the input going into the function,
+    making sure they're a matrix of list[list] with floats.
+    """
+    matrix: list[list[float]]
+
+# Initialize M and B
+M = np.ones((5, 5))  # 5x5 matrix of ones
+B = np.zeros((5, 5))  # 5x5 matrix of zeros
+
+@app.post("/calculate")
+def calculate(input_data: MatrixInput):
+    """
+    Perform the following operations:
+    - matrix_multiplication: (M * X) + B using NumPy.
+    - non_numpy_multiplication: (M * X) + B without NumPy.
+    - sigmoid_output: Apply sigmoid to matrix_multiplication.
+    """
+    X = np.array(input_data.matrix)  # Convert input to NumPy array
+
+    # Using NumPy for matrix multiplication
+    matrix_multiplication = np.dot(M, X) + B
+
+    # Without NumPy (manual calculation)
+    non_numpy_multiplication = [[0 for _ in range(5)] for _ in range(5)]
+    for i in range(5):
+        for j in range(5):
+            for k in range(5):
+                non_numpy_multiplication[i][j] += M[i][k] * X[k][j]
+            # Add bias
+            non_numpy_multiplication[i][j] += B[i][j]
+
+    # Apply sigmoid to the NumPy result
+    sigmoid_output = sigmoid(matrix_multiplication)
+
+    # Return the results
+    return {
+        "matrix_multiplication": matrix_multiplication.tolist(),
+        "non_numpy_multiplication": non_numpy_multiplication,
+        "sigmoid_output": sigmoid_output.tolist(),
+    }
 
 if __name__ == "__main__":
     uvicorn.run(app)
-
-'''
-    Create a requirements.txt
-    Upload to render
-'''
-
