@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import numpy as np
@@ -19,7 +19,7 @@ def sigmoid(x):
     The formula is 1 / (1 + e^(-x))
     but e is equivalent to 2.71828.
     """
-    return 1 / (1 + np.exp(-x)) #Optimized using numpy's np.exp
+    return 1 / (1 + np.exp(-x))  # Optimized using numpy's np.exp
 
 class MatrixInput(BaseModel):
     """
@@ -40,6 +40,10 @@ def calculate(input_data: MatrixInput):
     - non_numpy_multiplication: (M * X) + B without NumPy.
     - sigmoid_output: Apply sigmoid to matrix_multiplication.
     """
+    # Validate the matrix size (should be 5x5)
+    if len(input_data.matrix) != 5 or any(len(row) != 5 for row in input_data.matrix):
+        raise HTTPException(status_code=400, detail="Matrix must be 5x5")
+
     X = np.array(input_data.matrix)  # Convert input to NumPy array
 
     # Using NumPy for matrix multiplication
