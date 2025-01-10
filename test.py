@@ -70,3 +70,4 @@ def calculate(input_data: MatrixInput):
 
 if __name__ == "__main__":
     uvicorn.run(app)
+
