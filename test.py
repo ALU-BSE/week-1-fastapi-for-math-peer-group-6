@@ -32,6 +32,30 @@ class MatrixInput(BaseModel):
 M = np.ones((5, 5))  # 5x5 matrix of ones
 B = np.zeros((5, 5))  # 5x5 matrix of zeros
 
+def matrixMultiplication(matrix_a, matrix_b, bias):
+    if len(matrix_a[0]) != len(matrix_b):
+        return "Matrix A column value should be eqaul to Matrix B row."
+    summation, A, B, a, b = 0, 0, 0, 0, 0
+    matrix = []
+    array = []
+    
+    while True:
+        if B >= len(matrix_b):
+            array.append(summation + bias[A][b])
+            b += 1
+            summation, B, a = 0, 0, 0
+        if b >= len(matrix_b[0]):
+            matrix.append(array)
+            array = []
+            A += 1
+            summation, B, b, a = 0, 0, 0, 0
+        if A >= len(matrix_a):
+            break
+        summation += (matrix_a[A][a] * matrix_b[B][b])
+        a += 1
+        B += 1
+    return matrix
+
 @app.post("/calculate")
 def calculate(input_data: MatrixInput):
     """
@@ -46,13 +70,9 @@ def calculate(input_data: MatrixInput):
     matrix_multiplication = np.dot(M, X) + B
 
     # Without NumPy (manual calculation)
-    non_numpy_multiplication = [[0 for _ in range(5)] for _ in range(5)]
-    for i in range(5):
-        for j in range(5):
-            for k in range(5):
-                non_numpy_multiplication[i][j] += M[i][k] * X[k][j]
-            # Add bias
-            non_numpy_multiplication[i][j] += B[i][j]
+    non_numpy_multiplication = None
+
+    non_numpy_multiplication = matrixMultiplication(M, X, B)
 
     # Apply sigmoid to the NumPy result
     sigmoid_output = sigmoid(matrix_multiplication)
